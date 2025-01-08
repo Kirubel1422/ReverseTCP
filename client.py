@@ -21,7 +21,7 @@ def transfer(connection, path):
     if not os.path.exists(path):
         connection.send('File not found'.encode())
     
-    with open(path, 'rb') as f:
+    with open(path, 'rb', errors="ignore") as f:
         packet = f.read(1024)
 
         while packet:
@@ -42,6 +42,9 @@ def execute_command(s, cmd):
         exit(1)
     except KeyboardInterrupt as ke:
         print('\n[+] Exiting ...')
+        exit() 
+    except Exception as e:
+        print('[-] Connection Lost')
         exit()
 
 def connect():

@@ -53,7 +53,7 @@ def listen():
         try:
             command = input('Shell> ')
         except KeyboardInterrupt as ke:
-            print('[+] Exiting ...')
+            print('\n[+] Exiting ...')
             exit(0)
         
         if 'terminate' in command:

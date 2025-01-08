@@ -20,12 +20,13 @@ def execute(command):
 def transfer(connection, path):
     if not os.path.exists(path):
         connection.send('File not found'.encode())
+        return
     
     with open(path, 'rb') as f:
         packet = f.read(1024)
 
         while packet:
-            connection.send(packet)
+            connection.sendall(packet)
             packet = f.read(1024)
         
         connection.send('DONE'.encode())

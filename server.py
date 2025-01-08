@@ -17,7 +17,6 @@ def transfer(connection, command):
                     break
                 
                 f.write(data)
-                sys.stdout.write('.')
             except Exception as e:
                 print(f'[-] Failed to grab file {str(e)}')
                 return

@@ -21,7 +21,7 @@ def transfer(connection, path):
     if not os.path.exists(path):
         connection.send('File not found'.encode())
     
-    with open(path, 'rb', errors="ignore") as f:
+    with open(path, 'rb') as f:
         packet = f.read(1024)
 
         while packet:

@@ -22,14 +22,18 @@ def transfer(connection, path):
         connection.send('File not found'.encode())
         return
     
-    with open(path, 'rb') as f:
-        packet = f.read(1024)
-
-        while packet:
-            connection.sendall(packet)
+    try:
+        with open(path, 'rb') as f:
             packet = f.read(1024)
-        
-        connection.send('DONE'.encode())
+
+            while packet:
+                connection.sendall(packet)
+                packet = f.read(1024)
+            
+            connection.send('DONE'.encode())
+    except Exception as e:
+        msg = str(e) + " DONE"
+        connection.send(msg.encode())
 
 def execute_command(s, cmd):
     output = execute(cmd)

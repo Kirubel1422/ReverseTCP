@@ -12,6 +12,10 @@ def transfer(connection, command):
         while True:
             try:
                 data = connection.recv(1024)
+                if 'File not found' in data.decode():
+                    print('[-] File not found')
+                    return
+
                 if data.decode().endswith('DONE'):
                     print('[+] File grabbed successfully.')
                     break

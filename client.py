@@ -30,9 +30,9 @@ def transfer(connection, path):
                 connection.sendall(packet)
                 packet = f.read(1024)
             
-            connection.send('DONE'.encode())
+            connection.send(b'DONE')
     except Exception as e:
-        msg = str(e) + " DONE"
+        msg = f'{str(e)} DONE'
         connection.send(msg.encode())
 
 def execute_command(s, cmd):

